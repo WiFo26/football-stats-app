@@ -1,13 +1,11 @@
 import fs from 'fs'
-import { MatchResult } from './MatchResult';
-import { parseStringToDate } from './utils';
+export abstract class CsvFileReader<T> {
 
-type MatchData = [Date,string,string,number,number,MatchResult,string]
-export class CsvFileReader {
-
-  data: MatchData[] = [];
+  data: T[] = [];
 
   constructor(public filename: string) {}
+  
+  abstract mapRecord(record: string[]): T;
 
   read(): void{
     this.data = fs
@@ -16,16 +14,7 @@ export class CsvFileReader {
       })
       .split('\n')
       .map((record: string): string[] => record.split(','))
-      .map((record: string[]): MatchData => {
-        return [
-            parseStringToDate(record[0]),
-            record[1],
-            record[2],
-            parseInt(record[3]),
-            parseInt(record[4]),
-            record[5] as MatchResult,
-            record[6],
-        ]
-      })
+      .map(this.mapRecord)
   }
+
 }
